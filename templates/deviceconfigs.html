@@ -1,0 +1,14 @@
+<!-- <div id="deviceconfigs">
+    <div id="configs">{{ deviceconfigs }}</div>
+
+    <button type="submit" hx-post="/toggle" hx-target="#deviceconfigs" hx-swap="outerHTML">toggle</button>
+</div> -->
+
+<div id="deviceconfigs">
+    {% for deviceid, config in deviceconfigs.items() %}
+    <div id="{{ deviceid }}">
+        <div>{{ config }}<div></div>
+        <button hx-post="/toggle/{{ deviceid }}" hx-target="#deviceconfigs" hx-swap>toggle on off</button>
+    </div>
+    {% endfor %}
+</div>

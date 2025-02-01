@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width-device-width, initial-scale=1.0" />
+    <title>SporeHut System</title>
+    <script src="https://unpkg.com/htmx.org@1.6.1"></script>
+    <!-- <link href="/static/tailwind.css" rel="stylesheet" />
+    <link href="/static/base.css" rel="stylesheet" type="text/css" /> -->
+</head>
+<body>
+    <div id="app">
+        <header>
+            {{ app_name }}
+        </header>
+        <main>
+            <div id="deviceconfigs-wrapper">
+                {% include "deviceconfigs.html" %}
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>
