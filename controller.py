@@ -1,4 +1,6 @@
+import sys
 import time
+import traceback
 from enum import auto, StrEnum
 from multiprocessing import Event, Queue, Pipe, Process
 from multiprocessing.connection import Connection
@@ -57,13 +59,34 @@ from functools import partial
 #             next_check_time = time.time() + 5
 
 
-def wait_for_data_ready(humidity_sensor):
-    while not humidity_sensor.data_ready:
-        pass
+def wait_for_data_ready(humidity_sensor, max_retries: int = 3) -> bool:
+    data_is_ready = False
+    retry_count = 0
+
+    while not data_is_ready and retry_count < max_retries:
+        try:
+            data_is_ready |= humidity_sensor.data_ready
+            if data_is_ready:
+                break
+        except Exception:
+            excinfo = sys.exc_info()
+            print("Exception encountered when checking for ready data")
+            print("%s\n%s\n%s\n" % (excinfo[0], excinfo[1], traceback.print_tb(excinfo[2])))
+
+            retry_count += 1
+            print("Retry attempt %s" % retry_count)
+
+    return data_is_ready
+
 
 def low_humidity(humidity_sensor, threshold: float) -> bool:
     ret = False
-    wait_for_data_ready(humidity_sensor)
+
+    wait_result = wait_for_data_ready(humidity_sensor)
+    if wait_result is False:
+        print("Data is not ready...")
+        return False
+
     if humidity_sensor.data_ready:
         humidity = humidity_sensor.relative_humidity
         is_low = humidity < threshold
@@ -74,7 +97,12 @@ def low_humidity(humidity_sensor, threshold: float) -> bool:
 
 def high_humidity(humidity_sensor, threshold: float) -> bool:
     ret = False
-    wait_for_data_ready(humidity_sensor)
+
+    wait_result = wait_for_data_ready(humidity_sensor)
+    if wait_result is False:
+        print("Data is not ready...")
+        return False
+    
     humidity = humidity_sensor.relative_humidity
     is_high = humidity > threshold
     print("\nhigh humidity check\nmeasurement: %f\nthreshold: %f\nhumidity_is_high: %s" % (humidity, threshold, is_high))
